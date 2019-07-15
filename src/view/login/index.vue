@@ -1,9 +1,8 @@
 <template>
   <div class="login-container">
-    <!-- 卡片 -->
     <el-card class="login_box">
       <img src="../../assets/images/logo_index.png" alt />
-      <!-- 表单 -->
+
       <el-form ref="loginForm" status-icon :model="loginForm" :rules="loginRules">
         <el-form-item prop="mobile">
           <el-input v-model="loginForm.mobile" placeholder="请输入手机号"></el-input>
@@ -28,7 +27,6 @@
 <script>
 export default {
   data () {
-    // 校验手机号的
     const checkMobile = (rule, value, callback) => {
       if (/^1[3-9]\d{9}$/.test(value)) {
         callback()
@@ -37,15 +35,15 @@ export default {
       }
     }
     return {
-      // 表单对应的对象
+
       loginForm: {
         mobile: '13911111111',
         code: '246810'
       },
-      // 表单的校验规则对象
+
       loginRules: {
         mobile: [
-          // 具体的校验规则  比如 是否必填  长度  格式 ...
+
           { required: true, message: '手机号必填', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ],
@@ -54,40 +52,46 @@ export default {
           { len: 6, message: '必须是6位', trigger: 'blur' }
         ]
       },
-      // 默认选中复选框
+
       checked: true
     }
   },
   methods: {
     login () {
-      // 整体表单的校验
-      this.$refs.loginForm.validate(valid => {
+      this.$refs.loginForm.validate(async valid => {
         if (valid) {
-          // 如果校验成功 进行登录
-          this.$http
-            .post(
-              'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
-              this.loginForm
-            )
-            .then(res => {
-              // res 是响应对象  包含响应数据
-              const data = res.data
-              // 后台的返回的json内容  已经转换成了对象
-              console.log(data)
-              // 登录成功后：做什么事情？
-              // 1. 跳转到首页
-              // 2. 保存登录状态
-              this.$router.push('/')
-            })
-            .catch(() => {
-              // 提示错误  使用组件  消息提示组件
-              this.$message.error('用户名或密码错误')
-            })
+          try {
+            const backmessage = await this.$http.post('authorizations', this.loginForm)
+            window.sessionStorage.setItem('hmtoutiao', JSON.stringify(backmessage.data.data))
+            this.$router.push('/')
+          } catch (err) {
+            this.$message.error('密码或用户名错误')
+          }
         }
       })
     }
   }
 }
+// this.$refs.loginForm.validate(valid => {
+//   if (valid) {
+//     this.$http
+//       .post(
+//         'http://ttapi.research.itcast.cn/mp/v1_0/authorizations',
+//         this.loginForm
+//       )
+//       .then(res => {
+//         const data = res.data
+//         console.log(data)
+//         // 成功了以后不光要转到首页, 还要存一个token
+//         window.sessionStorage.setItem('hmtoutiao', JSON.stringify(res.data.data))
+
+//         this.$router.push('/')
+//       })
+//       .catch(() => {
+//         this.$message.error('用户名或密码错误')
+//       })
+//   }
+// })
 </script>
 
 <style scoped lang='less'>
@@ -109,9 +113,11 @@ export default {
       display: block;
       width: 200px;
       margin: 10px auto 30px;
+
     }
   }
 }
+
 .el-checkbox {
   margin-right: 5px;
 }
