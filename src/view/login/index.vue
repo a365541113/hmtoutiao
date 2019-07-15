@@ -30,7 +30,6 @@ export default {
   data () {
     // 校验手机号的
     const checkMobile = (rule, value, callback) => {
-      // 校验逻辑
       if (/^1[3-9]\d{9}$/.test(value)) {
         callback()
       } else {
